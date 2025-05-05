@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Buscador de Facilitadores</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+      background-color: #f7f9fb;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .top-bar button {
+      padding: 10px 16px;
+      font-size: 14px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .top-bar button:hover {
+      background-color: #2980b9;
+    }
+    input#buscador {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-left: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      table-layout: auto;
+    }
+    th, td {
+      padding: 6px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    th {
+      background-color: #3498db;
+      color: white;
+      font-size: 14px;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    td {
+      position: relative;
+    }
+    td:hover::after {
+      content: attr(title);
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 4px;
+      white-space: normal;
+      z-index: 10;
+      max-width: 300px;
+      top: 100%;
+      left: 0;
+    }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 400px;
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    .modal-content input, .modal-content select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .modal-content button {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+    .close {
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Buscador de Facilitadores de Compra</h1>
+
+  <div class="top-bar">
+    <button id="btnActualizar">Actualizar datos</button>
+    <input type="text" id="buscador" placeholder="Buscar por nombre, región, correo, etc...">
+  </div>
+
+  <div id="resultado"></div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="cerrarModal">&times;</span>
+      <h2>Actualizar Datos</h2>
+      <input type="text" id="nombreFacilitador" placeholder="🔤 Nombre del facilitador" oninput="this.value = this.value.toUpperCase()">
+      <input type="text" id="nuevoNumero" placeholder="📞 Número nuevo" maxlength="10" pattern="\d*">
+      <select id="host">
+        <option value="">👤 Selecciona el host</option>
+        <option>AMANDA HERNANDEZ VILLAGOMEZ</option>
+        <option>BRENDA LILIANA HERRERA ZUÑIGA</option>
+        <option>EDGAR URIEL ROSALES CORTEZ</option>
+        <option>EDUARDO JUAREZ PASTRANA</option>
+        <option>ERENDIRA JOSELYN MEDINA ONOFRE</option>
+        <option>GABRIELA VIEYRA MIRANDA</option>
+        <option>GEOVANNY MORALES ZUÑIGA</option>
+        <option>GRECIA PAOLA OTERO MORA</option>
+        <option>GUADALUPE GRISEL MARTINEZ GOMEZ</option>
+        <option>IVONNE RAYMUNDO ESPINOSA</option>
+        <option>JUAN ANTONIO ZARATE RAMOS</option>
+        <option>JUAN CARLOS MENDOZA SALDAÑA</option>
+        <option>JUAN CARLOS QUIROZ CERON</option>
+        <option>LEONELA MICHELLE RUIZ GUERRERO</option>
+        <option>MIRIAM CRUZ LOPEZ</option>
+        <option>ROSALBA TORRES TELLO</option>
+        <option>YAZMIN ESMERALDA LOPEZ FLORES</option>
+        <option>YOANA CONTRERAS VILLANUEVA</option>
+      </select>
+      <button onclick="enviarFormulario()">📨 Enviar</button>
+    </div>
+  </div>
+
+  <script>
+    const URL = "https://script.google.com/macros/s/AKfycbwoj2ocgvkiNKrMCRrf-dJGyr1pYUHHX5pTiJzibRVsH4oeM_GT5s4A_Awsi2faMtU3/exec";
+
+    document.getElementById("btnActualizar").onclick = function() {
+      document.getElementById("modal").style.display = "block";
+    };
+    document.getElementById("cerrarModal").onclick = function() {
+      document.getElementById("modal").style.display = "none";
+    };
+
+    function enviarFormulario() {
+      const facilitador = document.getElementById("nombreFacilitador").value.trim();
+      const telefono = document.getElementById("nuevoNumero").value.trim();
+      const host = document.getElementById("host").value.trim();
+
+      if (!facilitador || !telefono || !host) {
+        alert("Por favor, completa todos los campos.");
+        return;
+      }
+
+      if (!/^\d{10}$/.test(telefono)) {
+        alert("El número debe tener exactamente 10 dígitos.");
+        return;
+      }
+
+      const formData = new URLSearchParams();
+      formData.append("facilitador", facilitador);
+      formData.append("telefono", telefono);
+      formData.append("host", host);
+
+      fetch(URL, {
+        method: "POST",
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Respuesta no válida del servidor.");
+        return response.text();
+      })
+      .then(data => {
+        alert("Petición enviada. Por favor avisa a JOSE RAMIREZ.");
+        document.getElementById("modal").style.display = "none";
+        document.getElementById("nombreFacilitador").value = "";
+        document.getElementById("nuevoNumero").value = "";
+        document.getElementById("host").value = "";
+      })
+      .catch(error => {
+        alert("Error al enviar los datos.");
+        console.error(error);
+      });
+    }
+
+    function cargarDatos() {
+      fetch(URL)
+        .then(res => res.json())
+        .then(data => {
+          window.todosLosDatos = data;
+          mostrarDatos(data);
+        });
+    }
+
+    function mostrarDatos(datos) {
+      const container = document.getElementById("resultado");
+      if (datos.length === 0) {
+        container.innerHTML = "<p>No se encontraron resultados.</p>";
+        return;
+      }
+
+      const headers = Object.keys(datos[0]);
+      let tabla = "<table><thead><tr>";
+      headers.forEach(h => {
+        tabla += `<th>${h}</th>`;
+      });
+      tabla += "</tr></thead><tbody>";
+
+      datos.forEach(row => {
+        tabla += "<tr>";
+        headers.forEach(h => {
+          tabla += `<td title="${row[h]}">${row[h]}</td>`;
+        });
+        tabla += "</tr>";
+      });
+
+      tabla += "</tbody></table>";
+      container.innerHTML = tabla;
+    }
+
+    document.getElementById("buscador").addEventListener("input", function() {
+      const texto = this.value.toLowerCase();
+      const filtrado = window.todosLosDatos.filter(row =>
+        Object.values(row).some(
+          val => val.toString().toLowerCase().includes(texto)
+        )
+      );
+      mostrarDatos(filtrado);
+    });
+
+    cargarDatos();
+  </script>
+</body>
+</html>
